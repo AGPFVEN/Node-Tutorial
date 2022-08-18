@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main() {
+func primitives_tutorial_() {
 	//How booleans works
 	var q bool = true
 	fmt.Printf("%v, %T\n", q, q)
