@@ -12,7 +12,7 @@ const (
 	o2										//o2 = iota
 )
 
-func main() {
+func constants_tutorial_() {
 	//iota 
 	fmt.Printf("%v, %T\n", u, u)
 	fmt.Printf("%v, %T\n", i, i)
