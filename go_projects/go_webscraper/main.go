@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 
-	"github.com/chromedp/cdproto/cdp"
 	"github.com/chromedp/chromedp"
 )
 
@@ -20,21 +18,18 @@ func main(){
 	ctx, cancel = chromedp.NewContext(ctx)
 	defer cancel()
 
-	//var data string
-	var data []*cdp.Node
-	var data_status bool
+	//var data map
+	var data map[string]string
 
 	log.Println("Initializing Browser...")
 
 	err := chromedp.Run(ctx,
 		chromedp.Navigate("http://web.whatsapp.com/"),
-		chromedp.WaitEnabled("._25pwu", chromedp.ByQuery),
-		//chromedp.InnerHTML("._2UwZ_", &data, chromedp.ByQuery),
-		chromedp.Nodes("._2UwZ_", &data),
+		chromedp.WaitEnabled(".b77wc", chromedp.ByQuery),
+		chromedp.Attributes("._2UwZ_", &data),
 		)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf(string(data))
-	log.Println(data_status)
+	log.Println(data["data-ref"])
 }
