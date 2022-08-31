@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main(){
+func pointers_(){
 	x := 15
 
 	a := &x 			//memory adress of x
