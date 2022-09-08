@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -31,12 +32,17 @@ type News struct{
 	Locations []string `xml:"url>loc"` 		//Don't forget Locations with "L"
 }
 
+type NewsMap struct{
+	Keyword string //The "name" of the map will be the Title while the value will be Keywords and Locations"
+	Location string
+}
+
 func main(){
 	var s SitmapIndex
 	var n News
+	news_map := make(map[string]NewsMap)
 	resp, _ := http.Get("https://www.washingtonpost.com/wp-stat/sitemaps/index.xml")
 	bytes, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
 
 	xml.Unmarshal(bytes, &s)
 
@@ -52,5 +58,17 @@ func main(){
 		resp, _ := http.Get(Location)
 		bytes, _ := ioutil.ReadAll(resp.Body)
 		xml.Unmarshal(bytes, &n)
+		fmt.Println("this gets here")
+
+		//
+		for idx, _ := range n.Titles{
+			news_map[n.Titles[idx]] = NewsMap{n.Keywords[idx], n.Locations[idx]}
+		}
+	}
+
+	for idx, data := range news_map{
+		fmt.Println("\n\n\n", idx)
+		fmt.Println("\n", data.Keyword)
+		fmt.Println("\n", data.Location)
 	}
 }
