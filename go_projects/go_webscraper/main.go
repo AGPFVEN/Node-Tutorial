@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/chromedp/chromedp"
+	"github.com/skip2/go-qrcode"
 )
 
 func main(){
@@ -32,4 +33,6 @@ func main(){
 		log.Fatal(err)
 	}
 	log.Println(data["data-ref"])
+
+	qrcode.WriteFile(data["data-ref"], qrcode.Medium, 256, "qr.png")
 }
