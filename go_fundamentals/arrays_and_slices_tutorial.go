@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func main(){
+func arrayAndSlices(){
 	//Arrays
 	grades := [3]int{100, 90, 80}					//This is the way to declare an array
 	grades_improved := [...]int{100, 80, 70, 60}	//The three dots at the beginning to automate the number of items in the array

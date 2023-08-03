@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"path/filepath"
 )
 
 func main(){
@@ -43,10 +44,7 @@ func main(){
 	zipWriter := zip.NewWriter(zipFile)
 
 	//Iterate through every file in directory
-	root := "testDir"
-	fileSystem := os.DirFS(root)
-
-	fs.WalkDir(fileSystem, ".", func(path string, info fs.DirEntry, err error) error {
+	err = filepath.Walk("./testDir", func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			panic(err)
 		}
@@ -63,7 +61,7 @@ func main(){
 			return err
 		}
 		println("file opened")
-		println(fileDescriptor)
+		println(fileDescriptor.Name())
 
 		//Create zip Writer
 		zipFileWriter, err := zipWriter.Create(path)
