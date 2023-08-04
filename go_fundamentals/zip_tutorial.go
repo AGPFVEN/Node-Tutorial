@@ -4,38 +4,21 @@ import (
 	"archive/zip"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main(){
-	////Open a zip archive to read
-	//zipReader, err := zip.OpenReader("output.zip")
-	//if err != nil{
-		//panic(err)
-	//}
-	//defer zipReader.Close()
+	compress("output.zip","./testDir")
+	decompress("new_Output", "output.zip")
+}
 
-	////Iterate through files in archive
-	//for _, fileInsideZip := range zipReader.File{
-		//fmt.Printf("Content of %s:\n", fileInsideZip.Name)
-		//fileContent, err := fileInsideZip.Open()
-		//if (err != nil){
-			//panic(err)
-		//}
-
-		//_, err = io.Copy(os.Stdout, fileContent)
-		//if err != nil{
-			//panic(err)
-		//}
-		//fileContent.Close()
-		//println()
-	//}
-//}
-
-//func zipDir() (){
+func compress(destiny string, origin string) (){
+	//Zip-------------------------------------
 	//Create a buffer to write our archives to
-	zipFile, err := os.Create("output.zip")
+	zipFile, err := os.Create(destiny)
 	if err != nil{
 		panic(err)
 	}
@@ -44,11 +27,24 @@ func main(){
 	zipWriter := zip.NewWriter(zipFile)
 
 	//Iterate through every file in directory
-	err = filepath.Walk("./testDir", func(path string, info fs.FileInfo, err error) error {
+	err = filepath.Walk(origin, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			panic(err)
 		}
-		println(path)
+		//Catch first iteration
+		if path == origin{
+			return nil
+		}
+
+		//Remove the destiny of path
+		pathInZip := strings.Replace(path, strings.Replace(origin, "./", "", 1) + "/", "", 1)
+
+		//Create zip Writer
+		println(pathInZip)
+		zipFileWriter, err := zipWriter.Create(pathInZip)
+		if (err != nil){
+			panic(err)
+		}
 
 		//Check if path goes to a directoy
 		if (info.IsDir() == true){
@@ -60,22 +56,12 @@ func main(){
 		if (err != nil){
 			return err
 		}
-		println("file opened")
-		println(fileDescriptor.Name())
-
-		//Create zip Writer
-		zipFileWriter, err := zipWriter.Create(path)
-		if (err != nil){
-			panic(err)
-		}
 
 		//Copy content of file to zipfile
 		_, err = io.Copy(zipFileWriter, fileDescriptor)
 		if (err != nil){
 			panic(err)
 		}
-		println("zip wrote")
-
 
 		return nil
 	})
@@ -90,6 +76,51 @@ func main(){
 	if err != nil{
 		panic(err)
 	}
+}
 
-	println("Finished")
+func decompress(destiny string, origin string) (){
+	//Unzip--------------------------------------------------
+	//Create destiny directory
+	err := os.Mkdir(destiny, 0777)
+
+	//Open zip file
+	zipFile, err := zip.OpenReader(origin)
+	if err != nil {
+		panic(err)
+	}
+	defer zipFile.Close()
+
+	//Iterate through the files in the archive,
+	//printing some of their contents.
+	for _, fileInsideZip := range zipFile.File {
+		log.Printf("Contents of %s:\n", fileInsideZip.Name)
+
+		if strings.Index(fileInsideZip.Name, ".") == -1{
+			os.MkdirAll(filepath.Join(destiny, fileInsideZip.Name), 0777)	
+		} else {
+
+			//Open file inside zip (content)
+			rc, err := fileInsideZip.Open()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			//Create file
+			newfile, err := os.OpenFile(filepath.Join(destiny, fileInsideZip.Name), os.O_CREATE | os.O_WRONLY | os.O_TRUNC, 0777)
+			if err != nil{
+				log.Fatal(err)
+			}
+			println("file created")
+
+			_, err = io.Copy(newfile, rc)
+			if err != nil {
+				log.Fatal(err)
+			}
+			println("File written")
+			rc.Close()
+		}
+
+		//Print empty line
+		log.Println()
+	}
 }
