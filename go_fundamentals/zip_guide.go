@@ -10,12 +10,12 @@ import (
 	"strings"
 )
 
-func main(){
-	compress("output.zip","./testDir")
-	decompress("new_Output", "output.zip")
+func testZip(){
+	MyZip("output.zip","./testDir")
+	MyUnzip("new_Output", "output.zip")
 }
 
-func compress(destiny string, origin string) (){
+func MyZip(destiny string, origin string) (){
 	//Zip-------------------------------------
 	//Create a buffer to write our archives to
 	zipFile, err := os.Create(destiny)
@@ -28,28 +28,32 @@ func compress(destiny string, origin string) (){
 
 	//Iterate through every file in directory
 	err = filepath.Walk(origin, func(path string, info fs.FileInfo, err error) error {
-		if err != nil {
+		if err != nil{
 			panic(err)
 		}
+
 		//Catch first iteration
 		if path == origin{
 			return nil
 		}
-
+		
 		//Remove the destiny of path
-		pathInZip := strings.Replace(path, strings.Replace(origin, "./", "", 1) + "/", "", 1)
+		pathInZip := strings.Replace(path, strings.Replace(origin, "./", "", 1) + "/", "", 1)		
 
+		//Check if path goes to a directoy
+		if (info.IsDir()){
+			_, err := zipWriter.Create(pathInZip + "/")
+			if (err != nil){
+				panic(err)
+			}	
+			return nil
+		}	
 		//Create zip Writer
-		println(pathInZip)
 		zipFileWriter, err := zipWriter.Create(pathInZip)
 		if (err != nil){
 			panic(err)
-		}
-
-		//Check if path goes to a directoy
-		if (info.IsDir() == true){
-			return nil
-		}
+		}	
+		
 
 		//Open file
 		fileDescriptor, err := os.Open(path)
@@ -62,10 +66,11 @@ func compress(destiny string, origin string) (){
 		if (err != nil){
 			panic(err)
 		}
-
 		return nil
 	})
-	println()
+	if err != nil{
+		panic(err)
+	}
 
 	err = zipWriter.Close()
 	if err != nil{
@@ -78,10 +83,12 @@ func compress(destiny string, origin string) (){
 	}
 }
 
-func decompress(destiny string, origin string) (){
+func MyUnzip(destiny string, origin string) (){
 	//Unzip--------------------------------------------------
 	//Create destiny directory
-	err := os.Mkdir(destiny, 0777)
+	if err := os.Mkdir(destiny, 0777); err != nil{
+		panic(err)
+	}
 
 	//Open zip file
 	zipFile, err := zip.OpenReader(origin)
@@ -94,11 +101,10 @@ func decompress(destiny string, origin string) (){
 	//printing some of their contents.
 	for _, fileInsideZip := range zipFile.File {
 		log.Printf("Contents of %s:\n", fileInsideZip.Name)
-
-		if strings.Index(fileInsideZip.Name, ".") == -1{
+		if fileInsideZip.FileInfo().IsDir() {
 			os.MkdirAll(filepath.Join(destiny, fileInsideZip.Name), 0777)	
+			log.Println(fileInsideZip.Open())
 		} else {
-
 			//Open file inside zip (content)
 			rc, err := fileInsideZip.Open()
 			if err != nil {
