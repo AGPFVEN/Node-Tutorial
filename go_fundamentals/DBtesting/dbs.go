@@ -12,13 +12,19 @@ import (
 )
 
 func main() {
-    db, err := sql.Open("mysql", "ellicn8kupq98dtk3jk7:pscale_pw_9s98hoDsemF1hsQsrrM0vkAmGIHmoAHreSY4go3qTCR@tcp(aws.connect.psdb.cloud)/wss_test?tls=true")
+    //Connect
+    db, err := sql.Open("mysql", dbcred)
     if err != nil {
         log.Fatalf("failed to connect: %v", err)
     }
     defer db.Close()
+
+    //Verying connection
     if err := db.Ping(); err != nil {
         log.Fatalf("failed to ping: %v", err)
     }
     log.Println("Successfully connected to PlanetScale!")
+
+    //Insert row
+
 }
